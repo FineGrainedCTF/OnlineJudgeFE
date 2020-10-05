@@ -9,7 +9,7 @@ axios.defaults.xsrfHeaderName = 'X-CSRFToken'
 axios.defaults.xsrfCookieName = 'csrftoken'
 
 export default {
-  // 登录
+  // log in
   login (username, password) {
     return ajax('login', 'post', {
       data: {
@@ -24,7 +24,7 @@ export default {
   getProfile () {
     return ajax('profile', 'get')
   },
-  // 获取公告列表
+  // Get the list of announcements
   getAnnouncementList (offset, limit) {
     return ajax('admin/announcement', 'get', {
       params: {
@@ -34,7 +34,7 @@ export default {
       }
     })
   },
-  // 删除公告
+  // delete announcement
   deleteAnnouncement (id) {
     return ajax('admin/announcement', 'delete', {
       params: {
@@ -42,19 +42,19 @@ export default {
       }
     })
   },
-  // 修改公告
+  // Modification announcement
   updateAnnouncement (data) {
     return ajax('admin/announcement', 'put', {
       data
     })
   },
-  // 添加公告
+  // Add announcement
   createAnnouncement (data) {
     return ajax('admin/announcement', 'post', {
       data
     })
   },
-  // 获取用户列表
+  // Get user list
   getUserList (offset, limit, keyword) {
     let params = {paging: true, offset, limit}
     if (keyword) {
@@ -64,7 +64,7 @@ export default {
       params: params
     })
   },
-  // 获取单个用户信息
+  // Get individual user information
   getUser (id) {
     return ajax('admin/user', 'get', {
       params: {
@@ -72,7 +72,7 @@ export default {
       }
     })
   },
-  // 编辑用户
+  // edit user
   editUser (data) {
     return ajax('admin/user', 'put', {
       data
@@ -317,11 +317,11 @@ function ajax (url, method, options) {
       params,
       data
     }).then(res => {
-      // API正常返回(status=20x), 是否错误通过有无error判断
+      // The API returns normally (status=20x), whether there is an error is judged by whether there is error
       if (res.data.error !== null) {
         Vue.prototype.$error(res.data.data)
         reject(res)
-        // // 若后端返回为登录，则为session失效，应退出当前登录用户
+        // // If the backend returns to login, the session is invalid and the currently logged-in user should be logged out
         if (res.data.data.startsWith('Please login')) {
           router.push({name: 'login'})
         }
@@ -332,7 +332,7 @@ function ajax (url, method, options) {
         }
       }
     }, res => {
-      // API请求异常，一般为Server error 或 network error
+      // API request is abnormal, usually Server error or network error
       reject(res)
       Vue.prototype.$error(res.data.data)
     })
