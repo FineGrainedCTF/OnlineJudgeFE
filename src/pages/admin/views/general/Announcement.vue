@@ -70,7 +70,7 @@
         </div>
       </div>
     </Panel>
-    <!--对话框-->
+    <!--Dialog box-->
     <el-dialog :title="announcementDialogTitle" :visible.sync="showEditAnnouncementDialog"
                @open="onOpenEditDialog" :close-on-click-modal="false">
       <el-form label-position="top">
@@ -112,28 +112,28 @@
     data () {
       return {
         contestID: '',
-        // 显示编辑公告对话框
+        // Show edit announcement dialog
         showEditAnnouncementDialog: false,
-        // 公告列表
+        // Announcement list
         announcementList: [],
-        // 一页显示的公告数
+        // Number of announcements displayed on one page
         pageSize: 15,
-        // 总公告数
+        // Total number of announcements
         total: 0,
-        // 当前公告id
+        // current announcement id
         currentAnnouncementId: null,
         mode: 'create',
-        // 公告 (new | edit) model
+        // Announcement (new | edit) model
         announcement: {
           title: '',
           visible: true,
           content: ''
         },
-        // 对话框标题
+        // dialog title
         announcementDialogTitle: 'Edit Announcement',
-        // 是否显示loading
+        // Whether to display loading
         loading: true,
-        // 当前页码
+        // current page number
         currentPage: 0
       }
     },
@@ -149,7 +149,7 @@
           this.getAnnouncementList(1)
         }
       },
-      // 切换页码回调
+      // Switch page number callback
       currentChange (page) {
         this.currentPage = page
         this.getAnnouncementList(page)
@@ -173,10 +173,10 @@
           this.loading = false
         })
       },
-      // 打开编辑对话框的回调
+      // Open the callback of the edit dialog
       onOpenEditDialog () {
-        // todo 优化
-        // 暂时解决 文本编辑器显示异常bug
+        // todo optimization
+        // Temporarily solve the text editor display abnormal bug
         setTimeout(() => {
           if (document.createEvent) {
             let event = document.createEvent('HTMLEvents')
@@ -187,8 +187,8 @@
           }
         }, 0)
       },
-      // 提交编辑
-      // 默认传入MouseEvent
+      // Submit edit
+      // Pass in MouseEvent by default
       submitAnnouncement (data = undefined) {
         let funcName = ''
         if (!data.title) {
@@ -210,14 +210,14 @@
           this.init()
         }).catch()
       },
-      // 删除公告
+      // delete announcement
       deleteAnnouncement (announcementId) {
         this.$confirm('Are you sure you want to delete this announcement?', 'Warning', {
           confirmButtonText: 'Delete',
           cancelButtonText: 'Cancel',
           type: 'warning'
         }).then(() => {
-          // then 为确定
+          // then is OK
           this.loading = true
           let funcName = this.contestID ? 'deleteContestAnnouncement' : 'deleteAnnouncement'
           api[funcName](announcementId).then(res => {
@@ -225,7 +225,7 @@
             this.init()
           })
         }).catch(() => {
-          // catch 为取消
+          // catch is cancel
           this.loading = false
         })
       },
