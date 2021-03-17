@@ -294,6 +294,9 @@ export default {
     return ajax('export_problem', 'post', {
       data
     })
+  },
+  dontIndent (str) {
+    return ('' + str).replace(/(\n)\s+/g, '$1')
   }
 }
 

@@ -8,12 +8,12 @@
     <el-table :data="problems" v-loading="loading">
       <el-table-column
         label="ID"
-        width="100"
+        width="60"
         prop="id">
       </el-table-column>
       <el-table-column
         label="DisplayID"
-        width="200"
+        width="100"
         prop="_id">
       </el-table-column>
       <el-table-column
