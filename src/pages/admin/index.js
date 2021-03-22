@@ -15,6 +15,7 @@ import katex from '@/plugins/katex'
 import Panel from './components/Panel.vue'
 import IconBtn from './components/btn/IconBtn.vue'
 import Save from './components/btn/Save.vue'
+import Deploy from './components/btn/Deploy.vue'
 import Cancel from './components/btn/Cancel.vue'
 import './style.less'
 
@@ -31,6 +32,7 @@ Vue.use(katex)
 Vue.component(IconBtn.name, IconBtn)
 Vue.component(Panel.name, Panel)
 Vue.component(Save.name, Save)
+Vue.component(Deploy.name, Deploy)
 Vue.component(Cancel.name, Cancel)
 
 Vue.use(Element, {

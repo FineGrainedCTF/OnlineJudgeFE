@@ -5,6 +5,7 @@ export const m = {
   Description: 'Description',
   Input: 'Input',
   Output: 'Output',
+  Link: 'Download Link',
   Sample_Input: 'Sample Input',
   Sample_Output: 'Sample Output',
   Hint: 'Hint',
@@ -225,6 +226,7 @@ export const m = {
   Your_password_has_been_reset: 'Your password has been reset.',
   // Save.vue
   Save: 'Save',
+  Deploy: 'Deploy',
   // Simditor.vue
   Uploading_is_in_progress: 'Uploading is in progress, are you sure to leave this page?',
   // SubmissionDetails.vue

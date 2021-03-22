@@ -3,36 +3,18 @@
     <div id="problem-main">
       <!--problem main-->
       <Panel :padding="40" shadow>
-        <div slot="title">{{problem.title}}</div>
+        <div slot="title">{{sampleProblem.title}}</div>
         <div id="problem-content" class="markdown-body" v-katex>
           <p class="title">{{$t('m.Description')}}</p>
-          <p class="content" v-html=problem.description></p>
+          <p class="content" v-html=sampleProblem.description></p>
           <!-- {{$t('m.music')}} -->
-          <p class="title">{{$t('m.Input')}} <span v-if="problem.io_mode.io_mode=='File IO'">({{$t('m.FromFile')}}: {{ problem.io_mode.input }})</span></p>
-          <p class="content" v-html=problem.input_description></p>
+          <p class="title">{{$t('m.Link')}}</p>
 
-          <p class="title">{{$t('m.Output')}} <span v-if="problem.io_mode.io_mode=='File IO'">({{$t('m.ToFile')}}: {{ problem.io_mode.output }})</span></p>
-          <p class="content" v-html=problem.output_description></p>
-
-          <div v-for="(sample, index) of problem.samples" :key="index">
-            <div class="flex-container sample">
-              <div class="sample-input">
-                <p class="title">{{$t('m.Sample_Input')}} {{index + 1}}
-                  <a class="copy"
-                     v-clipboard:copy="sample.input"
-                     v-clipboard:success="onCopy"
-                     v-clipboard:error="onCopyError">
-                    <Icon type="clipboard"></Icon>
-                  </a>
-                </p>
-                <pre>{{sample.input}}</pre>
-              </div>
-              <div class="sample-output">
-                <p class="title">{{$t('m.Sample_Output')}} {{index + 1}}</p>
-                <pre>{{sample.output}}</pre>
-              </div>
-            </div>
-          </div>
+          <ul v-for="(item, idx) in sampleProblem.downloadLinks" v-bind:key="item+idx">
+            <li class="content">
+              {{item['link']}}
+            </li>
+          </ul>
 
           <div v-if="problem.hint">
             <p class="title">{{$t('m.Hint')}}</p>
@@ -41,12 +23,11 @@
             </Card>
           </div>
 
-          <div v-if="problem.source">
-            <p class="title">{{$t('m.Source')}}</p>
-            <p class="content">{{problem.source}}</p>
-          </div>
-
         </div>
+      </Panel>
+      <Panel :padding="40" shadow>
+        <div slot="title">Exploit Status</div>
+        <Table stripe :disabled-hover="true" :columns="columns" :data="submissions" :loading="loadingTable"></Table>
       </Panel>
       <!--problem main end-->
       <Card :padding="20" id="submit-code" dis-hover>
@@ -140,28 +121,31 @@
         </div>
         <ul>
           <li><p>ID</p>
-            <p>{{problem._id}}</p></li>
+            <p>{{sampleProblem.id}}</p></li>
           <li>
             <p>{{$t('m.Time_Limit')}}</p>
-            <p>{{problem.time_limit}}MS</p></li>
+            <p>{{sampleProblem.time_limit}}MS</p></li>
           <li>
             <p>{{$t('m.Memory_Limit')}}</p>
-            <p>{{problem.memory_limit}}MB</p></li>
+            <p>{{sampleProblem.memory_limit}}MB</p></li>
           <li>
+          <!--
           <li>
             <p>{{$t('m.IOMode')}}</p>
             <p>{{problem.io_mode.io_mode}}</p>
           </li>
+          -->
           <li>
             <p>{{$t('m.Created')}}</p>
-            <p>{{problem.created_by.username}}</p></li>
-          <li v-if="problem.difficulty">
+            <p>{{sampleProblem.created_by.username}}</p></li>
+          <li v-if="sampleProblem.difficulty">
             <p>{{$t('m.Level')}}</p>
-            <p>{{$t('m.' + problem.difficulty)}}</p></li>
-          <li v-if="problem.total_score">
+            <p>{{$t('m.' + sampleProblem.difficulty)}}</p></li>
+          <li v-if="sampleProblem.total_score">
             <p>{{$t('m.Score')}}</p>
-            <p>{{problem.total_score}}</p>
+            <p>{{sampleProblem.total_score}}</p>
           </li>
+          <!--
           <li>
             <p>{{$t('m.Tags')}}</p>
             <p>
@@ -173,6 +157,7 @@
               </Poptip>
             </p>
           </li>
+          -->
         </ul>
       </Card>
 
@@ -180,7 +165,9 @@
         <div slot="title">
           <Icon type="ios-analytics"></Icon>
           <span class="card-title">{{$t('m.Statistic')}}</span>
+          <!--
           <Button type="ghost" size="small" id="detail" @click="graphVisible = !graphVisible">Details</Button>
+          -->
         </div>
         <div class="echarts">
           <ECharts :options="pie"></ECharts>
@@ -230,7 +217,7 @@
         problemID: '',
         submitting: false,
         code: '',
-        language: 'C++',
+        language: '',
         theme: 'solarized',
         submissionId: '',
         submitted: false,
@@ -243,20 +230,103 @@
           hint: '',
           my_status: '',
           template: {},
-          languages: [],
+          languages: ['C', 'C++', 'Python2', 'Python3'],
           created_by: {
             username: ''
           },
           tags: [],
-          io_mode: {'io_mode': 'Standard IO'}
+          io_mode: {'io_mode': 'Standard IO'},
+          id: ''
         },
         pie: pie,
         largePie: largePie,
-        // echarts 无法获取隐藏dom的大小，需手动指定
+        // echarts cannot get the size of the hidden dom, you need to specify it manually
         largePieInitOpts: {
           width: '500',
           height: '480'
-        }
+        },
+        sampleProblem: {
+          title: 'Easy ROP',
+          description: 'nc bbkim.kr 31337',
+          hint: '',
+          my_status: '',
+          template: {},
+          languages: ['Python3'],
+          id: 1001,
+          time_limit: 1000,
+          memory_limit: 256,
+          created_by: {
+            username: 'root'
+          },
+          // High, Low, Mid
+          difficulty: 'Low',
+          total_score: 150,
+          downloadLinks: [
+            {
+              name: 'easyrop',
+              link: 'http://www.samplesite/sample_binary'
+            },
+            {
+              name: 'libc',
+              link: 'http://www.samplesite/libc.so.6'
+            }
+          ],
+          templateCodePrefix: `from pwn import *
+          # HOST, PORT will be automatically assigned(Do not reassign!)
+          s = remote(HOST, PORT)
+
+          # Write your exploit here!
+          `.replace(/(\n)\s+/g, '$1')
+        },
+        submissions: [
+          {
+            stage: 'EP1',
+            isSolved: true,
+            hint: 'problem\'s source code: http://samplesite.com/samplecode.c',
+            category: 'c, x86, buffer overflow, debugging, disassemble'
+          },
+          {
+            stage: 'EP2',
+            isSolved: true,
+            hint: 'The distance between the vulnerble buffer and the return address to be overwritten is 0x60.',
+            category: 'return address'
+          },
+          {
+            stage: 'EP3',
+            isSolved: false,
+            hint: 'oneshot gadget\'s offset is 0x3a7f9',
+            category: 'Available (Pay 10 points to open)'
+          },
+          {
+            stage: 'EP4(Final Stage)',
+            isSolved: false,
+            hint: 'Locked',
+            category: 'Locked'
+          }
+        ],
+        columns: [
+          {
+            title: 'Stage',
+            align: 'left',
+            key: 'stage'
+          },
+          {
+            title: 'Is Solved?',
+            align: 'left',
+            key: 'isSolved'
+          },
+          {
+            title: 'Catagory',
+            align: 'left',
+            key: 'category'
+          },
+          {
+            title: 'Hint',
+            align: 'left',
+            key: 'hint'
+          }
+        ],
+        loadingTable: false
       }
     },
     beforeRouteEnter (to, from, next) {
@@ -281,15 +351,19 @@
         this.$Loading.start()
         this.contestID = this.$route.params.contestID
         this.problemID = this.$route.params.problemID
+
+        /*
         let func = this.$route.name === 'problem-details' ? 'getProblem' : 'getContestProblem'
         api[func](this.problemID, this.contestID).then(res => {
           this.$Loading.finish()
           let problem = res.data.data
           this.changeDomTitle({title: problem.title})
+          // console.log(problem)
           api.submissionExists(problem.id).then(res => {
             this.submissionExists = res.data.data
           })
           problem.languages = problem.languages.sort()
+          console.log(this.problem)
           this.problem = problem
           this.changePie(problem)
 
@@ -298,50 +372,79 @@
             return
           }
           // try to load problem template
-          this.language = this.problem.languages[0]
+          this.language = this.problem.languages[5] // Python3
           let template = this.problem.template
           if (template && template[this.language]) {
             this.code = template[this.language]
           }
+          console.log(this.language)
+          console.log(template)
+          this.code = 'test'
+          console.log(this.code)
         }, () => {
           this.$Loading.error()
         })
+        */
+        this.$Loading.finish()
+        this.language = 'Python3'
+        this.code = this.sampleProblem.templateCodePrefix
       },
       changePie (problemData) {
-        // 只显示特定的一些状态
+        // Only show certain status
         for (let k in problemData.statistic_info) {
           if (filtedStatus.indexOf(k) === -1) {
             delete problemData.statistic_info[k]
           }
         }
-        let acNum = problemData.accepted_number
+        // let acNum = problemData.accepted_number
+        /*
         let data = [
           {name: 'WA', value: problemData.submission_number - acNum},
-          {name: 'AC', value: acNum}
+          {name: 'AC', value: acNum},
+          {name: 'MLE', value: 11}
+        ]
+        */
+        let sampleData = {
+          'WA': 41,
+          'EP1': 23,
+          'EP2': 16,
+          'EP3': 8,
+          'ACCEPT': 5
+        }
+
+        let data = [
+          {value: sampleData.WA, name: 'WA'},
+          {value: sampleData.EP1, name: 'EP1'},
+          {value: sampleData.EP2, name: 'EP2'},
+          {value: sampleData.EP3, name: 'EP3'},
+          {value: sampleData.ACCEPT, name: 'ACCEPT'}
         ]
         this.pie.series[0].data = data
-        // 只把大图的AC selected下，这里需要做一下deepcopy
+        console.log(data)
+        // Only select the AC selected of the big picture, here we need to do a deepcopy
         let data2 = JSON.parse(JSON.stringify(data))
         data2[1].selected = true
         this.largePie.series[1].data = data2
+        console.log(data2)
 
-        // 根据结果设置legend,没有提交过的legend不显示
+        // Set the legend according to the result, and the legend that has not been submitted will not be displayed
         let legend = Object.keys(problemData.statistic_info).map(ele => JUDGE_STATUS[ele].short)
         if (legend.length === 0) {
-          legend.push('AC', 'WA')
+          legend.push('WA', 'EP1', 'EP2', 'EP3', 'ACCEPT')
         }
         this.largePie.legend.data = legend
 
-        // 把ac的数据提取出来放在最后
-        let acCount = problemData.statistic_info['0']
+        // Extract the ac data and put it at the end
+        // let acCount = problemData.statistic_info['0']
         delete problemData.statistic_info['0']
 
         let largePieData = []
         Object.keys(problemData.statistic_info).forEach(ele => {
           largePieData.push({name: JUDGE_STATUS[ele].short, value: problemData.statistic_info[ele]})
         })
-        largePieData.push({name: 'AC', value: acCount})
+        largePieData.push({name: 'ACCEPT', value: sampleData.ACCEPT})
         this.largePie.series[0].data = largePieData
+        console.log(this.largePie)
       },
       handleRoute (route) {
         this.$router.push(route)
@@ -371,9 +474,9 @@
         })
       },
       checkSubmissionStatus () {
-        // 使用setTimeout避免一些问题
+        // Use setTimeout to avoid some problems
         if (this.refreshStatus) {
-          // 如果之前的提交状态检查还没有停止,则停止,否则将会失去timeout的引用造成无限请求
+          // If the previous submission status check has not stopped, stop, otherwise you will lose the timeout reference and cause unlimited requests
           clearTimeout(this.refreshStatus)
         }
         const checkStatus = () => {
@@ -404,7 +507,7 @@
         this.result = {result: 9}
         this.submitting = true
         let data = {
-          problem_id: this.problem.id,
+          problem_id: this.sampleProblem.id,
           language: this.language,
           code: this.code,
           contest_id: this.contestID
@@ -444,7 +547,7 @@
               title: '',
               content: '<h3>' + this.$i18n.t('m.You_have_submission_in_this_problem_sure_to_cover_it') + '<h3>',
               onOk: () => {
-                // 暂时解决对话框与后面提示对话框冲突的问题(否则一闪而过）
+                // Temporarily solve the conflict between the dialog box and the prompt dialog box (otherwise it will flash by)
                 setTimeout(() => {
                   submitFunc(data, false)
                 }, 1000)
@@ -490,7 +593,7 @@
       }
     },
     beforeRouteLeave (to, from, next) {
-      // 防止切换组件后仍然不断请求
+      // Prevent constant requests after switching components
       clearInterval(this.refreshStatus)
 
       this.$store.commit(types.CHANGE_CONTEST_ITEM_VISIBLE, {menu: true})

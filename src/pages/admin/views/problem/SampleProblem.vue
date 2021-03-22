@@ -4,253 +4,37 @@
     <Panel :title="title">
       <el-form ref="form" :model="problem" :rules="rules" label-position="top" label-width="70px">
         <el-row :gutter="20">
-          <el-col :span="4">
+          <el-col :span="6">
             <el-form-item prop="_id" :label="$t('m.Display_ID')"
                           :required="this.routeName === 'create-contest-problem' || this.routeName === 'edit-contest-problem'">
               <el-input :placeholder="$t('m.Display_ID')" v-model="problem._id"></el-input>
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :span="18">
             <el-form-item prop="title" :label="$t('m.Title')" required>
               <el-input :placeholder="$t('m.Title')" v-model="problem.title"></el-input>
             </el-form-item>
           </el-col>
-          <el-col :span="4">
-            <el-form-item  :label="$t('m.Prob_Score')" required>
-              <el-input :placeholder="100" v-model="problem.score"></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item :label="$t('m.Prob_File')" :error="error.testcase" required>
-              <el-upload
-                action="/api/admin/test_case"
-                name="file"
-                :data="{spj: problem.spj}"
-                :show-file-list="true"
-                :on-success="uploadSucceeded"
-                :on-error="uploadFailed">
-                <el-button size="small" type="primary" icon="el-icon-fa-upload">Choose File</el-button>
-              </el-upload>
-            </el-form-item>
-          </el-col>
         </el-row>
-
-        <el-row :gutter="20">
-          <el-col :span="12">
-            <el-form-item :label="$t('m.Build_Options')">
-              <el-input :placeholder="$t('m.Build_Options_Desc')" ></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item :label="$t('m.Mitigations')" :error="error.languages" required>
-              <el-tooltip class="spj-radio"  v-for="miti in mitigations" :key="miti" :content="miti" effect="dark" placement="top-start">
-                  <el-checkbox :label="miti"></el-checkbox>
-                </el-tooltip>
-            </el-form-item>
-          </el-col>
-        </el-row>
-
-        <el-form-item :label="$t('m.Build_Template')">
-          <el-row>
-            <el-col :span="24" v-for="(v, k) in template" :key="'template'+k">
-              <el-form-item>
-                <el-checkbox v-if="k==='C'" v-model="v.checked"> Makefile Template </el-checkbox>
-                <div v-if="v.checked">
-                  <code-mirror v-model="v.code" :mode="v.mode"></code-mirror>
-                </div>
-              </el-form-item>
-            </el-col>
-          </el-row>
-        </el-form-item>
-
-
-
-        <div>
-          <el-form-item v-for="(sample, index) in problem.samples" :key="'sample'+index">
-            <Accordion v-if="index < 4" :title="'Setting for Evaluation Point ' + (index + 1)">
-              <el-button type="warning" size="small" icon="el-icon-delete" slot="header" @click="deleteSample(index)">
-                Delete
-              </el-button>
-              <el-row :gutter="20">
-                <el-col :span="16">
-                  <el-form-item :label="$t('m.Hint')" required>
-                    <el-input
-                      :rows="3"
-                      type="textarea"
-                      :placeholder="$t('m.Hint_Placeholder')"
-                      v-model="sample.input">
-                    </el-input>
-                  </el-form-item>
-                </el-col>
-
-                <el-col :span="4">
-                  <el-form-item :label="$t('m.Difficulty')" required>
-                    <el-select class="difficulty-select" size="small" :placeholder="$t('m.Difficulty')" v-model="problem.difficulty">
-                      <el-option :label="$t('m.Low')" value="Low"></el-option>
-                      <el-option :label="$t('m.Mid')" value="Mid"></el-option>
-                      <el-option :label="$t('m.High')" value="High"></el-option>
-                    </el-select>
-                  </el-form-item>
-                </el-col>
-              </el-row>
-
-              <el-row :gutter="20" v-if="index===0">
-                <el-col :span="20">
-                  <el-form-item :label="$t('m.Knowledge_Type_Ep1')" :error="error.languages" required>
-                    <el-tooltip class="spj-radio"  v-for="ep1_know in ep1_knowledges" :key="ep1_know" :content="ep1_know" effect="dark" placement="top-start">
-                        <el-checkbox :label="ep1_know"></el-checkbox>
-                      </el-tooltip>
-                  </el-form-item>
-                </el-col>
-              </el-row>
-
-              <el-row :gutter="20" v-if="index===1">
-                <el-col :span="20">
-                  <el-form-item :label="$t('m.Knowledge_Type_Ep2')" :error="error.languages" required>
-                    <el-tooltip class="spj-radio"  v-for="ep2_know in ep2_knowledges" :key="ep2_know" :content="ep2_know" effect="dark" placement="top-start">
-                        <el-checkbox :label="ep2_know"></el-checkbox>
-                      </el-tooltip>
-                  </el-form-item>
-                </el-col>
-              </el-row>
-
-              <el-row :gutter="20" v-if="index===2">
-                <el-col :span="20">
-                  <el-form-item :label="$t('m.Knowledge_Type_Ep3')" :error="error.languages" required>
-                    <el-tooltip class="spj-radio"  v-for="ep3_know in ep3_knowledges" :key="ep3_know" :content="ep3_know" effect="dark" placement="top-start">
-                        <el-checkbox :label="ep3_know"></el-checkbox>
-                      </el-tooltip>
-                  </el-form-item>
-                </el-col>
-              </el-row>
-
-              <el-row :gutter="20" v-if="index===3">
-                <el-col :span="20">
-                  <el-form-item :label="$t('m.Knowledge_Type_Ep4')" :error="error.languages" required>
-                    <el-tooltip class="spj-radio"  v-for="ep4_know in ep4_knowledges" :key="ep4_know" :content="ep4_know" effect="dark" placement="top-start">
-                        <el-checkbox :label="ep4_know"></el-checkbox>
-                      </el-tooltip>
-                  </el-form-item>
-                </el-col>
-              </el-row>
-
-              <el-form-item v-if="index < 4">
-              <span class="tags">
-                <el-tag
-                  v-for="tag in problem.tags"
-                  :closable="true"
-                  :close-transition="false"
-                  :key="tag"
-                  type="success"
-                  @close="closeTag(tag)"
-                >{{tag}}</el-tag>
-              </span>
-              <el-autocomplete
-                v-if="inputVisible"
-                size="mini"
-                class="input-new-tag"
-                v-model="tagInput"
-                :trigger-on-focus="false"
-                @keyup.enter.native="addTag"
-                @blur="addTag"
-                @select="addTag"
-                :fetch-suggestions="querySearch">
-              </el-autocomplete>
-              <el-button class="button-new-tag" v-else size="small" @click="inputVisible = true">+ Add More</el-button>
-            </el-form-item>
-
-              <el-row :gutter="20" v-if="index===0">
-                <el-col :span="20">
-                  <el-form-item :label="$t('m.Skill_Type_Ep1')" :error="error.languages" required>
-                    <el-tooltip class="spj-radio"  v-for="ep1_s in ep1_skills" :key="ep1_s" :content="ep1_s" effect="dark" placement="top-start">
-                        <el-checkbox :label="ep1_s"></el-checkbox>
-                      </el-tooltip>
-                  </el-form-item>
-                </el-col>
-              </el-row>
-
-
-              <el-row :gutter="20" v-if="index===1">
-                <el-col :span="20">
-                  <el-form-item :label="$t('m.Skill_Type_Ep2')" :error="error.languages" required>
-                    <el-tooltip class="spj-radio"  v-for="ep2_s in ep2_skills" :key="ep2_s" :content="ep2_s" effect="dark" placement="top-start">
-                        <el-checkbox :label="ep2_s"></el-checkbox>
-                      </el-tooltip>
-                  </el-form-item>
-                </el-col>
-              </el-row>
-
-
-              <el-row :gutter="20" v-if="index===2">
-                <el-col :span="20">
-                  <el-form-item :label="$t('m.Skill_Type_Ep3')" :error="error.languages" required>
-                    <el-tooltip class="spj-radio"  v-for="ep3_s in ep3_skills" :key="ep3_s" :content="ep3_s" effect="dark" placement="top-start">
-                        <el-checkbox :label="ep3_s"></el-checkbox>
-                      </el-tooltip>
-                  </el-form-item>
-                </el-col>
-              </el-row>
-
-              <el-form-item v-if="index<4">
-              <span class="tags">
-                <el-tag
-                  v-for="tag in problem.tags"
-                  :closable="true"
-                  :close-transition="false"
-                  :key="tag"
-                  type="success"
-                  @close="closeTag(tag)"
-                >{{tag}}</el-tag>
-              </span>
-              <el-autocomplete
-                v-if="inputVisible"
-                size="mini"
-                class="input-new-tag"
-                v-model="tagInput"
-                :trigger-on-focus="false"
-                @keyup.enter.native="addTag"
-                @blur="addTag"
-                @select="addTag"
-                :fetch-suggestions="querySearch">
-              </el-autocomplete>
-              <el-button class="button-new-tag" v-else size="small" @click="inputVisible = true">+ Add More</el-button>
-            </el-form-item>
-
-
-            </Accordion>
-          </el-form-item>
-        </div>
-        <div class="add-sample-btn">
-          <button type="button" class="add-samples" @click="addSample()"><i class="el-icon-plus"></i>{{$t('m.Add_Feedback')}}
-          </button>
-        </div>
-        
-
-
         <el-row :gutter="20">
           <el-col :span="24">
-            <el-form-item prop="description" :label="$t('m.Problem_Description')" required>
+            <el-form-item prop="description" :label="$t('m.Description')" required>
               <Simditor v-model="problem.description"></Simditor>
             </el-form-item>
           </el-col>
         </el-row>
-
-
-
-
         <el-row :gutter="20">
           <el-col :span="24">
-            <el-form-item v-if="test" prop="input_description" :label="$t('m.Input_Description')" required>
+            <el-form-item prop="input_description" :label="$t('m.Input_Description')" required>
               <Simditor v-model="problem.input_description"></Simditor>
             </el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item v-if="test" prop="output_description" :label="$t('m.Output_Description')" required>
+            <el-form-item prop="output_description" :label="$t('m.Output_Description')" required>
               <Simditor v-model="problem.output_description"></Simditor>
             </el-form-item>
           </el-col>
         </el-row>
-
         <el-row :gutter="20">
           <el-col :span="8">
             <el-form-item :label="$t('m.Time_Limit') + ' (ms)' " required>
@@ -291,7 +75,7 @@
               </el-switch>
             </el-form-item>
           </el-col>
-          <el-col :span="6">
+          <el-col :span="8">
             <el-form-item :label="$t('m.Tag')" :error="error.tags" required>
               <span class="tags">
                 <el-tag
@@ -317,9 +101,165 @@
               <el-button class="button-new-tag" v-else size="small" @click="inputVisible = true">+ {{$t('m.New_Tag')}}</el-button>
             </el-form-item>
           </el-col>
+          <el-col :span="8">
+            <el-form-item :label="$t('m.Languages')" :error="error.languages" required>
+              <el-checkbox-group v-model="problem.languages">
+                <el-tooltip class="spj-radio" v-for="lang in allLanguage.languages" :key="'spj'+lang.name" effect="dark"
+                            :content="lang.description" placement="top-start">
+                  <el-checkbox :label="lang.name"></el-checkbox>
+                </el-tooltip>
+              </el-checkbox-group>
+            </el-form-item>
+          </el-col>
         </el-row>
+        <div>
+          <el-form-item v-for="(sample, index) in problem.samples" :key="'sample'+index">
+            <Accordion :title="'Sample' + (index + 1)">
+              <el-button type="warning" size="small" icon="el-icon-delete" slot="header" @click="deleteSample(index)">
+                Delete
+              </el-button>
+              <el-row :gutter="20">
+                <el-col :span="12">
+                  <el-form-item :label="$t('m.Input_Samples')" required>
+                    <el-input
+                      :rows="5"
+                      type="textarea"
+                      :placeholder="$t('m.Input_Samples')"
+                      v-model="sample.input">
+                    </el-input>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item :label="$t('m.Output_Samples')" required>
+                    <el-input
+                      :rows="5"
+                      type="textarea"
+                      :placeholder="$t('m.Output_Samples')"
+                      v-model="sample.output">
+                    </el-input>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+            </Accordion>
+          </el-form-item>
+        </div>
+        <div class="add-sample-btn">
+          <button type="button" class="add-samples" @click="addSample()"><i class="el-icon-plus"></i>{{$t('m.Add_Sample')}}
+          </button>
+        </div>
+        <el-form-item style="margin-top: 20px" :label="$t('m.Hint')">
+          <Simditor v-model="problem.hint" placeholder=""></Simditor>
+        </el-form-item>
+        <el-form-item :label="$t('m.Code_Template')">
+          <el-row>
+            <el-col :span="24" v-for="(v, k) in template" :key="'template'+k">
+              <el-form-item>
+                <el-checkbox v-model="v.checked">{{ k }}</el-checkbox>
+                <div v-if="v.checked">
+                  <code-mirror v-model="v.code" :mode="v.mode"></code-mirror>
+                </div>
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </el-form-item>
+        <el-form-item :label="$t('m.Special_Judge')" :error="error.spj">
+          <el-col :span="24">
+            <el-checkbox v-model="problem.spj" @click.native.prevent="switchSpj()">{{$t('m.Use_Special_Judge')}}</el-checkbox>
+          </el-col>
+        </el-form-item>
+        <el-form-item v-if="problem.spj">
+          <Accordion :title="$t('m.Special_Judge_Code')">
+            <template slot="header">
+              <span>{{$t('m.SPJ_language')}}</span>
+              <el-radio-group v-model="problem.spj_language">
+                <el-tooltip class="spj-radio" v-for="lang in allLanguage.spj_languages" :key="lang.name" effect="dark"
+                            :content="lang.description" placement="top-start">
+                  <el-radio :label="lang.name">{{ lang.name }}</el-radio>
+                </el-tooltip>
+              </el-radio-group>
+              <el-button type="primary" size="small" icon="el-icon-fa-random" @click="compileSPJ"
+                         :loading="loadingCompile">
+                {{$t('m.Compile')}}
+              </el-button>
+            </template>
+            <code-mirror v-model="problem.spj_code" :mode="spjMode"></code-mirror>
+          </Accordion>
+        </el-form-item>
+        <el-row :gutter="20">
+          <el-col :span="4">
+            <el-form-item :label="$t('m.Type')">
+              <el-radio-group v-model="problem.rule_type" :disabled="disableRuleType">
+                <el-radio label="ACM">ACM</el-radio>
+                <el-radio label="OI">OI</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+            <el-form-item :label="$t('m.TestCase')" :error="error.testcase">
+              <el-upload
+                action="/api/admin/test_case"
+                name="file"
+                :data="{spj: problem.spj}"
+                :show-file-list="true"
+                :on-success="uploadSucceeded"
+                :on-error="uploadFailed">
+                <el-button size="small" type="primary" icon="el-icon-fa-upload">Choose File</el-button>
+              </el-upload>
+            </el-form-item>
+          </el-col>
+
+          <el-col :span="6">
+            <el-form-item :label="$t('m.IOMode')">
+              <el-radio-group v-model="problem.io_mode.io_mode">
+                <el-radio label="Standard IO">Standard IO</el-radio>
+                <el-radio label="File IO">File IO</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </el-col>
+
+          <el-col :span="4" v-if="problem.io_mode.io_mode == 'File IO'">
+            <el-form-item :label="$t('m.InputFileName')" required>
+              <el-input type="text" v-model="problem.io_mode.input"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="4" v-if="problem.io_mode.io_mode == 'File IO'">
+            <el-form-item :label="$t('m.OutputFileName')" required>
+              <el-input type="text" v-model="problem.io_mode.output"></el-input>
+            </el-form-item>
+          </el-col>
+
+          <el-col :span="24">
+            <el-table
+              :data="problem.test_case_score"
+              style="width: 100%">
+              <el-table-column
+                prop="input_name"
+                :label="$t('m.Input')">
+              </el-table-column>
+              <el-table-column
+                prop="output_name"
+                :label="$t('m.Output')">
+              </el-table-column>
+              <el-table-column
+                prop="score"
+                :label="$t('m.Score')">
+                <template slot-scope="scope">
+                  <el-input
+                    size="small"
+                    :placeholder="$t('m.Score')"
+                    v-model="scope.row.score"
+                    :disabled="problem.rule_type !== 'OI'">
+                  </el-input>
+                </template>
+              </el-table-column>
+            </el-table>
+          </el-col>
+        </el-row>
+
+        <el-form-item :label="$t('m.Source')">
+          <el-input :placeholder="$t('m.Source')" v-model="problem.source"></el-input>
+        </el-form-item>
         <save @click.native="submit()">Save</save>
-        <deploy @click.native="submit()">Deploy</deploy>
       </el-form>
     </Panel>
   </div>
@@ -332,7 +272,7 @@
   import api from '../../api'
 
   export default {
-    name: 'Problem',
+    name: 'SampleProblem',
     components: {
       Simditor,
       Accordion,
@@ -349,7 +289,6 @@
         loadingCompile: false,
         mode: '',
         contest: {},
-        test_tags: [],
         problem: {
           languages: [],
           io_mode: {'io_mode': 'Standard IO', 'input': 'input.txt', 'output': 'output.txt'}
@@ -360,24 +299,12 @@
         },
         testCaseUploaded: false,
         allLanguage: {},
-        mitigations: ['NX', 'ASLR', 'SSP'],
-        ep1_knowledges: ['c', 'c++', 'x86', 'x86-64', 'arm', 'mips', 'buffer overflow', 'use after free', 'heap overflow', 'integer overflow', 'type confusion'],
-        ep1_skills: ['debugging', 'symbolic execution', 'deassemble', 'decompile', 'taint analysis', 'fuzzing', 'deobfuscation'],
-        ep2_knowledges: ['v-table', 'return address', 'global offset table', 'function pointer'],
-        ep2_skills: ['shellcoding'],
-        ep3_knowledges: ['W⊕X', 'DEP', 'NX', 'ASLR', 'Stack Protector'],
-        ep3_skills: ['return oriented programming', 'jump oriented programming', 'return to csu', 'return to library', 'return to dynamic resolve', 'stack pivot', 'oneshot gadget', 'libc leak'],
-        ep4_knowledges: ['system command', 'flag format'],
-        ep4_skills: [''],
         inputVisible: false,
         tagInput: '',
         template: {},
         title: '',
         spjMode: '',
         disableRuleType: false,
-        test: false,
-        knowledge_auditing: '',
-        knowledge_reversing: '',
         routeName: '',
         error: {
           tags: '',
@@ -440,6 +367,7 @@
         if (this.mode === 'edit') {
           this.title = this.$i18n.t('m.Edit_Problem')
           let funcName = {'edit-problem': 'getProblem', 'edit-contest-problem': 'getContestProblem'}[this.routeName]
+          console.log(funcName)
           api[funcName](this.$route.params.problemId).then(problemRes => {
             let data = problemRes.data.data
             if (!data.spj_code) {
@@ -471,34 +399,8 @@
             let langConfig = this.allLanguage.languages.find(lang => {
               return lang.name === item
             })
-            // console.log(langConfig)
             if (this.problem.template[item] === undefined) {
               data[item] = {checked: false, code: langConfig.config.template, mode: langConfig.content_type}
-              if (item === 'C') {
-                // data["c"] = {checked: false, code: langConfig.config.template, mode: langConfig.content_type}
-                data[item].code = api.dontIndent(`#PREPEND BEGIN
-                                          MITIGATIONS="" #Generated by Internal Logic
-                                          CXX_FLAGS="" #Build Flags given by user
-                                          #PREPEND END
-
-                                          #TEMPLATE BEGIN
-                                          TARGETS="prob"
-                                          CXX="clang"
-                                          CC="clang"
-
-                                          TARGETS: $(TARGETS).cpp
-                                          @echo Compiling $< to $@
-                                          @$(CXX) $(CXXFLAGS) -o $@ $<
-                                          #TEMPLATE END
-
-                                          #APPEND BEGIN
-                                          clean:
-                                              rm -rf $(TARGETS)
-                                          
-                                          .PHONY: clean all
-                                          #APPEND END`)
-                console.log(langConfig.config.template)
-              }
             } else {
               data[item] = {checked: true, code: this.problem.template[item], mode: langConfig.content_type}
             }
@@ -507,7 +409,6 @@
           }
         }
         this.template = data
-        console.log(this.template)
       },
       'problem.spj_language' (newVal) {
         this.spjMode = this.allLanguage.spj_languages.find(item => {
@@ -609,18 +510,18 @@
       },
       submit () {
         if (!this.problem.samples.length) {
-          // this.$error('Sample is required')
+          this.$error('Sample is required')
           return
         }
         for (let sample of this.problem.samples) {
           if (!sample.input || !sample.output) {
-            // this.$error('Sample input and output is required')
+            this.$error('Sample input and output is required')
             return
           }
         }
         if (!this.problem.tags.length) {
-          // this.error.tags = 'Please add at least one tag'
-          // this.$error(this.error.tags)
+          this.error.tags = 'Please add at least one tag'
+          this.$error(this.error.tags)
           return
         }
         if (this.problem.spj) {
@@ -636,24 +537,24 @@
           }
         }
         if (!this.problem.languages.length) {
-          // this.error.languages = 'Please choose at least one language for problem'
-          // this.$error(this.error.languages)
+          this.error.languages = 'Please choose at least one language for problem'
+          this.$error(this.error.languages)
           return
         }
         if (!this.testCaseUploaded) {
-          // this.error.testCase = 'Test case is not uploaded yet'
-          // this.$error(this.error.testCase)
+          this.error.testCase = 'Test case is not uploaded yet'
+          this.$error(this.error.testCase)
           return
         }
         if (this.problem.rule_type === 'OI') {
           for (let item of this.problem.test_case_score) {
             try {
               if (parseInt(item.score) <= 0) {
-                // this.$error('Invalid test case score')
+                this.$error('Invalid test case score')
                 return
               }
             } catch (e) {
-              // this.$error('Test case score must be an integer')
+              this.$error('Test case score must be an integer')
               return
             }
           }
@@ -667,6 +568,7 @@
         }
         let funcName = {
           'create-problem': 'createProblem',
+          'create-sample': 'createProblem',
           'edit-problem': 'editProblem',
           'create-contest-problem': 'createContestProblem',
           'edit-contest-problem': 'editContestProblem'

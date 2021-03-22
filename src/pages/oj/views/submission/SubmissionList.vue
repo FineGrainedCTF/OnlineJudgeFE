@@ -35,6 +35,8 @@
             </li>
           </ul>
         </div>
+        
+        <Table stripe :disabled-hover="true" :columns="sampleColumns" :data="sampleSubmissions" :loading="loadingTable"></Table>
         <Table stripe :disabled-hover="true" :columns="columns" :data="submissions" :loading="loadingTable"></Table>
         <Pagination :total="total" :page-size="limit" @on-change="changeRoute" :current.sync="page"></Pagination>
       </Panel>
@@ -62,11 +64,12 @@
           result: '',
           username: ''
         },
-        columns: [
+        sampleColumns: [
           {
             title: this.$i18n.t('m.When'),
             align: 'center',
             render: (h, params) => {
+              // console.log(params.row.create_time)
               return h('span', time.utcToLocal(params.row.create_time))
             }
           },
@@ -74,6 +77,138 @@
             title: this.$i18n.t('m.ID'),
             align: 'center',
             render: (h, params) => {
+              // console.log(params.row)
+              if (params.row.show_link) {
+                return h('span', {
+                  style: {
+                    color: '#57a3f3',
+                    cursor: 'pointer'
+                  },
+                  on: {
+                    click: () => {
+                      this.$router.push('/status/' + params.row.id)
+                    }
+                  }
+                }, params.row.id.slice(0, 12))
+              } else {
+                return h('span', params.row.id.slice(0, 12))
+              }
+            }
+          },
+          {
+            title: this.$i18n.t('m.Status'),
+            align: 'center',
+            render: (h, params) => {
+              return h('Tag', {
+                props: {
+                  color: JUDGE_STATUS[params.row.result].color
+                }
+              }, this.$i18n.t('m.' + JUDGE_STATUS[params.row.result].name.replace(/ /g, '_')))
+            }
+          },
+          {
+            title: this.$i18n.t('m.Problem'),
+            align: 'center',
+            render: (h, params) => {
+              return h('span',
+                {
+                  style: {
+                    color: '#57a3f3',
+                    cursor: 'pointer'
+                  },
+                  on: {
+                    click: () => {
+                      if (this.contestID) {
+                        this.$router.push(
+                          {
+                            name: 'contest-problem-details',
+                            params: {problemID: params.row.problem, contestID: this.contestID}
+                          })
+                      } else {
+                        this.$router.push({name: 'problem-details', params: {problemID: params.row.problem}})
+                      }
+                    }
+                  }
+                },
+                params.row.problem)
+            }
+          },
+          {
+            title: this.$i18n.t('m.Time'),
+            align: 'center',
+            render: (h, params) => {
+              return h('span', utils.submissionTimeFormat(params.row.statistic_info.time_cost))
+            }
+          },
+          {
+            title: this.$i18n.t('m.Memory'),
+            align: 'center',
+            render: (h, params) => {
+              return h('span', utils.submissionMemoryFormat(params.row.statistic_info.memory_cost))
+            }
+          },
+          {
+            title: this.$i18n.t('m.Language'),
+            align: 'center',
+            key: 'language'
+          },
+          {
+            title: 'test',
+            align: 'center',
+            key: 'test'
+          },
+          {
+            title: this.$i18n.t('m.Author'),
+            align: 'center',
+            render: (h, params) => {
+              return h('a', {
+                style: {
+                  'display': 'inline-block',
+                  'max-width': '150px'
+                },
+                on: {
+                  click: () => {
+                    this.$router.push(
+                      {
+                        name: 'user-home',
+                        query: {username: params.row.username}
+                      })
+                  }
+                }
+              }, params.row.username)
+            }
+          }
+        ],
+        sampleSubmissions: [
+          {
+            create_time: '2021-03-20T14:33:20.716859Z',
+            id: '45744555396b3ea58b418b7aafed605c',
+            language: 'Python3',
+            loading: false,
+            problem: 'easy rop',
+            result: -1,
+            shared: true,
+            show_link: true,
+            statistic_info: {},
+            user_id: 1,
+            username: 'root',
+            test: 'asdf'
+          }
+        ],
+        columns: [
+          {
+            title: this.$i18n.t('m.When'),
+            align: 'center',
+            render: (h, params) => {
+              console.log(params.row.create_time)
+              return h('span', time.utcToLocal(params.row.create_time))
+            }
+          },
+          {
+            title: this.$i18n.t('m.ID'),
+            align: 'center',
+            render: (h, params) => {
+              console.log(params.row)
               if (params.row.show_link) {
                 return h('span', {
                   style: {
@@ -221,6 +356,7 @@
         this.loadingTable = true
         api[func](offset, this.limit, params).then(res => {
           let data = res.data.data
+          console.log(data)
           for (let v of data.results) {
             v.loading = false
           }

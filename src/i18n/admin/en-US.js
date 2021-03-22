@@ -73,6 +73,7 @@ export const m = {
   Languages: 'Languages',
   Input_Samples: 'Input Samples',
   Output_Samples: 'Output Samples',
+  Add_Feedback: 'Add Feedback',
   Add_Sample: 'Add Sample',
   Code_Template: 'Code_Template',
   Special_Judge: 'Special Judge',
